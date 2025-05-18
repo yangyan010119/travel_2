@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行计划生成器</title>
+</head>
+<body>
+    <h1>旅行计划生成器</h1>
+    <form id="trip-form">
+        <label for="departure">出发地:</label>
+        <input type="text" id="departure" name="departure"><br><br>
+
+        <label for="destination">目的地:</label>
+        <input type="text" id="destination" name="destination" onblur="fetchScenicSpots()"><br><br>
+
+        <label for="num_people">人数:</label>
+        <input type="number" id="num_people" name="num_people" min="1"><br><br>
+
+        <label>偏好：</label><br>
+        <input type="checkbox" name="preferences" value="历史">历史
+        <input type="checkbox" name="preferences" value="美食">美食
+        <input type="checkbox" name="preferences" value="文化">文化<br><br>
+
+        <label for="budget">预算:</label>
+        <input type="text" id="budget" name="budget"><br><br>
+
+        <label for="travel_date">出发日期:</label>
+        <input type="date" id="travel_date" name="travel_date"><br><br>
+
+        <label for="duration_days">天数:</label>
+        <input type="number" id="duration_days" name="duration_days" min="1"><br><br>
+
+        <label for="food_preferences">餐饮偏好:</label>
+        <select id="food_preferences" name="food_preferences">
+            <option value="">请选择</option>
+            <option value="中餐">中餐</option>
+            <option value="西餐">西餐</option>
+            <option value="素食">素食</option>
+        </select><br><br>
+
+        <label>景点：</label><br>
+        <div id="scenic_spots_container">
+            <!-- 动态生成景点复选框 -->
+        </div><br>
+
+        <label>酒店类型：</label><br>
+        <input type="checkbox" name="hotel_type" value="快捷">快捷
+        <input type="checkbox" name="hotel_type" value="豪华">豪华<br><br>
+
+        <button type="button" onclick="generateTravelPlan()">生成旅行计划</button>
+    </form>
+
+    <div id="result">
+        <!-- 旅行计划结果将显示在这里 -->
+    </div>
+
+    <script>
+        function generateTravelPlan() {
+            let departure = document.getElementById('departure').value;
+            let destination = document.getElementById('destination').value;
+            let num_people = document.getElementById('num_people').value;
+            let preferences = [];
+            document.querySelectorAll('input[name="preferences"]:checked').forEach((checkbox) => {
+                preferences.push(checkbox.value);
+            });
+            let budget = document.getElementById('budget').value;
+            let travel_date = document.getElementById('travel_date').value;
+            let duration_days = document.getElementById('duration_days').value;
+            let food_preferences = document.getElementById('food_preferences').value;
+            let scenic_spots = [];
+            document.querySelectorAll('input[name="scenic_spots"]:checked').forEach((checkbox) => {
+                scenic_spots.push(checkbox.value);
+            });
+            let hotel_type = [];
+            document.querySelectorAll('input[name="hotel_type"]:checked').forEach((checkbox) => {
+                hotel_type.push(checkbox.value);
+            });
+
+            // 发送 AJAX 请求
+            fetch('/generate_trip/?departure=' + departure + '&destination=' + destination + '&num_people=' + num_people +
+                  '&preferences=' + preferences.join(',') + '&budget=' + budget + '&travel_date=' + travel_date +
+                  '&duration_days=' + duration_days + '&food_preferences=' + food_preferences + '&scenic_spots=' + scenic_spots.join(',') +
+                  '&hotel_type=' + hotel_type.join(','))
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 4)}</pre>`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // 根据目的地生成景点复选框
+        function fetchScenicSpots() {
+            let destination = document.getElementById('destination').value;
+            if (!destination) return;
+
+            fetch('/get_scenic_spots/?destination=' + encodeURIComponent(destination))
+                .then(response => response.json())
+                .then(data => {
+                    let spotsDiv = document.getElementById('scenic_spots_container');
+                    spotsDiv.innerHTML = '';  // 清空旧内容
+
+                    if (data.spots && data.spots.length > 0) {
+                        data.spots.forEach(spot => {
+                            let checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'scenic_spots';
+                            checkbox.value = spot;
+                            spotsDiv.appendChild(checkbox);
+                            spotsDiv.appendChild(document.createTextNode(spot));
+                            spotsDiv.appendChild(document.createElement('br'));
+                        });
+                    } else {
+                        spotsDiv.innerHTML = '未找到相关景点';
+                    }
+                })
+                .catch(error => {
+                    console.error('景点加载失败:', error);
+                });
+        }
+    </script>
+</body>
+</html>

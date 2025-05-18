@@ -1,0 +1,62 @@
+<!-- app01/templates/app01/travel_plan_result.html -->
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>你的旅游计划</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 20px; border-radius: 8px; background-color: #f9f9f9; }
+        pre { white-space: pre-wrap; }
+
+        .feedback-box { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; }
+        .stars label {
+            font-size: 2rem;
+            color: lightgray;
+            cursor: pointer;
+        }
+        .stars input:checked ~ label {
+            color: gold;
+        }
+        .stars input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>为你定制的旅游计划</h1>
+    <div class="box">
+        <h3>目的地：{{ travel_info.destination }}</h3>
+        <h4>出行时间：{{ travel_info.travel_start_date }} 到 {{ travel_info.travel_end_date }}</h4>
+        <h4>预算：￥{{ travel_info.budget }}</h4>
+        <h4>旅行同伴：{{ travel_info.travel_companion|default:"无" }}</h4>
+    </div>
+
+    <h2>推荐行程：</h2>
+    <pre>{{ plan_text }}</pre>
+
+    <div class="feedback-box">
+        <h2>你的反馈</h2>
+        <form method="post" action="{% url 'submit_feedback' travel_info.id %}">
+            {% csrf_token %}
+            <p>满意度评分：</p>
+            <div class="stars">
+                {% for i in "54321" %}
+                    <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}">
+                    <label for="star{{ i }}">★</label>
+                {% endfor %}
+            </div>
+
+            <p>你的意见：</p>
+            <textarea name="comment" rows="4" cols="50" placeholder="说说你的想法..."></textarea><br><br>
+
+            <button type="submit">提交反馈</button>
+        </form>
+    </div>
+
+    <br>
+    <a href="{% url 'add_travel_info' user_id=travel_info.user.id %}">再来一份新的计划</a>
+</body>
+</html>
+

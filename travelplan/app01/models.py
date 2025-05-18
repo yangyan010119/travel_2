@@ -26,3 +26,17 @@ class TravelInfo(models.Model):
     def __str__(self):
         return f"Travel to {self.destination} by {self.user.username}"
 
+from django.db import models
+class Feedback(models.Model):
+    travel_info = models.ForeignKey('TravelInfo', on_delete=models.CASCADE)
+    rating = models.IntegerField(null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
+    reviewed = models.BooleanField(default=False)
+    approved = models.BooleanField(default=True)
+    review_reason = models.CharField(max_length=255, null=True, blank=True)
+    sentiment = models.CharField(max_length=20, null=True, blank=True)  # positive/neutral/negative
+    quality_score = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"反馈: {self.travel_info.destination} - {self.rating or '未评分'}星"

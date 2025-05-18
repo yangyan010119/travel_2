@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Travel Plan - Travel Planner AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 导航栏样式（与user.html完全一致） */
+        @font-face {
+            font-family: 'Chalkboard';
+            src: local('Chalkboard SE'), local('ChalkboardSE-Regular');
+        }
+        body {
+            font-family: 'Chalkboard SE', 'Chalkboard', 'Comic Sans MS', cursive;
+            background: #f8f9fa;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2A3456;
+            font-family: 'Chalkboard SE', 'Chalkboard', 'Comic Sans MS', cursive;
+        }
+
+        .logo span {
+            color: #4A90E2;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #000000;
+            text-decoration: none;
+            position: relative;
+            font-family: 'Chalkboard SE', 'Chalkboard', 'Comic Sans MS', cursive;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: #000000;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .nav-link i {
+            color: #000000;
+            margin-right: 6px;
+        }
+
+
+        label {
+            color: #2A3456;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #E0E7FF;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4A90E2;
+        }
+
+
+
+        .creation-container {
+            max-width: 600px;
+            width: 90%;
+            margin: 3rem auto;
+            padding: 1.5rem 1.2rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-sizing: border-box; /* 新增盒模型计算方式 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5%);
+        }
+        h1 {
+            font-size: 1.8rem;
+            color: #2A3456;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        /* 统一字体设置 */
+        .section-title,
+        .search-input,
+        .checkbox-item,
+        .primary-btn {
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #4A90E2;
+            margin: 1.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #E0E7FF;
+        }
+
+        /* 紧凑输入框 */
+        .search-input {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            border: 2px solid #E0E7FF;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+        .search-input, .date-picker input {
+            width: calc(100% - 4px); /* 宽度微调 */
+            box-sizing: border-box; /* 包含padding和border */
+            border-width: 1.5px; /* 减细边框 */
+            padding: 0.7rem; /* 调整内边距 */
+        }
+
+        /* 紧凑复选框布局 */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f0f4ff;
+            border-radius: 20px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            min-width: fit-content;
+        }
+
+
+        .checkbox-item:hover {
+            background: #E0E7FF;
+        }
+
+        .checkbox-item input {
+            margin-right: 0.8rem;
+            width: 18px;
+            height: 18px;
+        }
+        /* 特殊项处理 */
+        .checkbox-item[data-label="cultural"] {
+            white-space: nowrap;
+            padding-right: 16px;
+        }
+
+        /* 悬停效果 */
+        .checkbox-item:hover {
+            background: #dbe4ff;
+            transform: translateY(-1px);
+        }
+
+        /* 日期选择器调整 */
+        .date-picker {
+            display: grid;
+            gap: 0.6rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+
+        /* 紧凑按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .primary-btn {
+            background: #4A90E2;
+            color: white;
+            padding: 0.8rem 4rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .primary-btn:hover {
+            background: #357ABD;
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: #4A90E2;
+            border: 2px solid #4A90E2;
+        }
+
+        .secondary-btn:hover {
+            background: #F0F4FF;
+        }
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .creation-container {
+                margin: 1.5rem auto;
+                padding: 1rem;
+            }
+
+            .date-picker {
+                grid-template-columns: 1fr;
+            }
+
+            .search-input {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏（与user.html完全一致） -->
+    <nav class="nav-bar">
+        <div class="logo">
+            <span class="logo">Travel Planner</span> AI
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Discovery</a><!--待修改-->
+            <a href="#" class="nav-link">History</a><!--待修改-->
+            <a href="{% url 'travel_dashboard' %}" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link"><!--待修改-->
+                <i class="fas fa-user"></i> User
+            </a>
+        </div>
+    </nav>
+
+    <div class="creation-container">
+        <h1>Create Travel Plan</h1>
+
+        <!-- 目的地搜索 -->
+        <div class="section">
+            <h2 class="section-title">Search for your destination city</h2>
+            <input type="text"
+                   class="search-input"
+                   placeholder="Search for your destination city...">
+        </div>
+
+        <!-- 日期选择 -->
+        <div class="section">
+            <h2 class="section-title">Select Dates</h2>
+            <div class="date-picker">
+                <input type="date" class="search-input" placeholder="Start Date">
+                <input type="date" class="search-input" placeholder="End Date">
+            </div>
+        </div>
+
+        <!-- 活动类型选择 -->
+        <div class="section">
+            <h2 class="section-title">Select the kind of activities you want to do (Optional)</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item" data-label="sightseeing">
+                    <input type="checkbox"> Sightseeing&nbsp;&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item" data-label="adventure">
+                    <input type="checkbox"> Adventure&nbsp;&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item" data-label="cultural">
+                    <input type="checkbox"> Cultural Experiences&nbsp;&nbsp;&nbsp;
+                </label>
+
+                <label class="checkbox-item" data-label="historical">
+                    <input type="checkbox"> Historical&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item" data-label="relaxation">
+                    <input type="checkbox"> Relaxation&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item" data-label="shopping">
+                    <input type="checkbox"> Shopping&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item" data-label="nightlife">
+                    <input type="checkbox"> Nightlife&nbsp;
+                </label>
+            </div>
+        </div>
+
+        <!-- 同行人员 -->
+        <div class="section">
+            <h2 class="section-title">Who are you travelling with (Optional)</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" name="companions" value="solo">
+                    &nbsp;&nbsp;Solo&nbsp;&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="companions" value="couple">
+                    &nbsp;&nbsp;Couple&nbsp;&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="companions" value="family">
+                    &nbsp;&nbsp;Family&nbsp;&nbsp;&nbsp;
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="companions" value="group">
+                    &nbsp;&nbsp;Group&nbsp;&nbsp;&nbsp;
+                </label>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button type="button" class="primary-btn secondary-btn">
+                Create Your Plan
+            </button>
+            <button type="submit" class="primary-btn">
+                Generate AI Plan
+            </button>
+        </div>
+    </div>
+</body>
+</html>
