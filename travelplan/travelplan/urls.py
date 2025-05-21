@@ -18,12 +18,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app01 import views
+from django.shortcuts import redirect
 
 urlpatterns = [
 	path('admin/', admin.site.urls), #admin 控制界面路由
-	path('index/',views.index),
-    path('', views.home),  # 设置首页路由
-
+	# path('index/',views.index),
+    # path('', views.home),  # 设置首页路由
+	path('', lambda _: redirect('/login/')),  # 自动跳转到登录页
 	path('register/', views.register,name='register'),
 	path('login/', views.login,name='login'),
 	path('travel_info/<int:travel_id>/', views.travel_info, name='travel_info'),
@@ -31,10 +32,11 @@ urlpatterns = [
 	path('submit_feedback/<int:travel_info_id>/', views.submit_feedback, name='submit_feedback'),
 	# 生成旅行计划
 	# 用来显示旅行表单页面
-	path('show_trip_form/', views.show_trip_form, name='show_trip_form'),  # 用户访问根路径时显示表单页面
+	# path('show_trip_form/', views.show_trip_form, name='show_trip_form'),  # 用户访问根路径时显示表单页面
 	path('generate_trip/', views.generate_trip, name='generate_trip'),
 	path('user/', views.user_page, name='user_page'),
 	path('dashboard/', views.travel_dashboard, name='travel_dashboard'),
+	# path('AIplan/', views.AIplan, name='AIplan'),
 	path('get_scenic_spots/', views.get_scenic_spots, name='get_scenic_spots'),
 ]
 

@@ -117,11 +117,12 @@ def travel_dashboard(request):
     user = get_object_or_404(User, id=request.session['user_id'])
 
     # 处理表单提交逻辑（后续可以扩展）
-    if request.method == 'POST':
+    # if request.method == 'POST':
         # 这里可以添加处理偏好设置表单的逻辑
-        pass
+        # pass
 
-    return render(request, 'app01/traveldashboard.html', {'user': user})
+    return render(request, 'app01/generate_trip.html',{'user': user})
+    # return render(request, 'app01/traveldashboard.html', {'user': user})
 
 # 显示旅游信息
 def travel_info(request, travel_id):
@@ -292,16 +293,49 @@ def get_scenic_spots(request):
 
 #--------------------------------------------------------------------
 # 旅行信息提交表单
-def show_trip_form(request):
-    return render(request, 'app01/generate_trip.html')
+# def show_trip_form(request):
+    # return render(request, 'app01/generate_trip.html')
 
 # 调用旅行计划生成，输入旅行要求，输出旅行计划
 from django.shortcuts import render
 from django.http import JsonResponse
+import re
 from .agent.plan_agent import generate_travel_plan  # 假设你的函数在travel_service.py文件中
 @require_GET
 def generate_trip(request):
     # 获取请求中的参数
+    departure = request.GET.get('departure', '西安')
+    destination = request.GET.get('destination', '北京')
+
+    try:
+        num_people = int(request.GET.get('num_people', 2))
+    except ValueError:
+        num_people = 2
+
+    preferences = request.GET.getlist('preferences')
+    if not preferences:
+        preferences = ['历史', '美食', '文化']
+
+    budget_raw = request.GET.get('budget', '4000元')
+    budget = int(re.search(r'\d+', budget_raw).group())  # 提取数字部分
+
+    travel_date = request.GET.get('travel_date', '2025-07-10')
+
+    try:
+        duration_days = int(request.GET.get('duration_days', 3))
+    except ValueError:
+        duration_days = 3
+
+    food_preferences = request.GET.get('food_preferences', '中餐')
+
+    scenic_spots = request.GET.getlist('scenic_spots')
+    if not scenic_spots:
+        scenic_spots = ['天安门', '故宫', '长城']
+
+    hotel_type = request.GET.getlist('hotel_type')
+    if not hotel_type:
+        hotel_type = ['快捷']
+    """
     departure = request.GET.get('departure', '西安')
     destination = request.GET.get('destination', '北京')
     num_people = int(request.GET.get('num_people', 2))
@@ -312,7 +346,7 @@ def generate_trip(request):
     food_preferences = request.GET.get('food_preferences', '中餐')
     scenic_spots = request.GET.getlist('scenic_spots', ['天安门', '故宫', '长城'])
     hotel_type = request.GET.getlist('hotel_type', ['快捷'])
-
+    """
     # 调用generate_travel_plan函数
     travel_plan = generate_travel_plan(
         departure=departure,
@@ -326,13 +360,21 @@ def generate_trip(request):
         scenic_spots=scenic_spots,
         hotel_type=hotel_type
     )
-    # 返回 JSON 响应，明确指定编码
 
+
+    # 返回 JSON 响应，明确指定编码
     is_dict = isinstance(travel_plan, dict)
     response = JsonResponse(travel_plan, safe=is_dict, json_dumps_params={"ensure_ascii": False})
 
+    # response = JsonResponse(travel_plan, safe=False, json_dumps_params={"ensure_ascii": False})
     response["Content-Type"] = "application/json; charset=utf-8"
+    print(response)
+    # 将生成的计划存储到 session 中 (存储原始数据而不是 JsonResponse 对象)
+    # request.session['trip_data'] = travel_plan
+    # print("Travel Plan:", travel_plan)
+
     return response
+
 
 
 
