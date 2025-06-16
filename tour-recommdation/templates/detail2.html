@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/amazeui.min.css' %}">
+<script src="{% static 'js/amazeui.min.js' %}"></script>
+<script src="{% static 'lib/jquery.raty.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div id="detail_html">
+    <ol class="am-breadcrumb">
+        <li><a href="/">首页</a></li>
+        <li class="am-active">详情</li>
+    </ol>
+
+    <div id="detail_content">
+        <h1 class="tit">{{ tview.tview_name }}</h1>
+
+        <div class="countbox">
+            <div class="c_item"><strong>出发地：</strong>{{ tview.tview_from }}</div>
+            <div class="c_item"><strong>目的地：</strong>{{ tview.tview_to }}</div>
+            <div class="c_item"><strong>推荐天数：</strong>{{ tview.tview_day }}</div>
+            <div class="c_item"><strong>行程亮点：</strong>{{ tview.tview_journey|linebreaks }}</div>
+        </div>
+
+        <div id="rating_box">
+            <div class="left">
+                <strong class="rating_num">平均评分：{{ trate }}分</strong>
+                <div id="star"></div>
+                <span id="rating_num">({{ tpn }}人评分)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-panel am-panel-default" id="team">
+        <div class="am-panel-hd">类似推荐</div>
+        <div class="am-panel-bd">
+            <!-- 水平滚动的推荐卡片 -->
+            <div class="scrollable-recommendations">
+                <div class="recommendations-container">
+                    {% for item in tsim %}
+                    <div class="recommendation-card">
+                        <div class="card-content">
+                            <div class="card-header">
+                                <h3>{{ item.tview_name }}</h3>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>出发地:</strong> {{ item.tview_from }}</p>
+                                <p><strong>目的地:</strong> {{ item.tview_to }}</p>
+                                <p><strong>行程天数:</strong> {{ item.tview_day }}天</p>
+                                <p><strong>评分:</strong> {{ item.tview_rate }}</p>
+                                <div class="journey-preview">
+                                    {{ item.tview_journey|truncatechars:60 }}
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="/tdetail?id={{ item.tid }}" class="am-btn am-btn-primary">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="no-recommendations">暂无类似推荐</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- 滚动控制按钮 -->
+            <div class="scroll-controls">
+                <button id="scroll-left" class="am-btn am-btn-default"><i class="am-icon-angle-left"></i></button>
+                <button id="scroll-right" class="am-btn am-btn-default"><i class="am-icon-angle-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-panel am-panel-default">
+        <div class="am-panel-hd">评分</div>
+        <div class="am-panel-bd">
+            <p>请为本次行程评分：</p>
+            <div id="user_rating"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 显示平均评分（只读）
+    $('#star').raty({
+        path: '{% static 'lib/img' %}',
+        readOnly: true,
+        score: {{ trate }},
+        half: true
+    });
+
+    // 用户评分（可交互）
+    $('#user_rating').raty({
+        path: '{% static 'lib/img' %}',
+        half: true,
+        click: function(score, evt) {
+            $.ajax({
+                type: 'post',
+                url: '/tdetail',
+                data: {
+                    'score': score,
+                    'tid': '{{ tview.tid }}'
+                },
+                success: function(msg) {
+                    alert(msg.msg);
+                    if(msg.type == 'success') {
+                        // 评分成功后刷新页面
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("评分失败: " + error);
+                }
+            });
+        }
+    });
+
+    // 水平滚动控制
+    $(document).ready(function() {
+        const container = $('.recommendations-container');
+        const cardWidth = $('.recommendation-card').outerWidth(true);
+        const visibleCards = Math.floor($('.scrollable-recommendations').width() / cardWidth);
+
+        $('#scroll-right').click(function() {
+            container.animate({
+                scrollLeft: container.scrollLeft() + cardWidth * visibleCards
+            }, 300);
+        });
+
+        $('#scroll-left').click(function() {
+            container.animate({
+                scrollLeft: container.scrollLeft() - cardWidth * visibleCards
+            }, 300);
+        });
+    });
+</script>
+
+<style>
+    .countbox .c_item {
+        margin-bottom: 10px;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+    #rating_box {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+    .rating_num {
+        font-size: 18px;
+        color: #f60;
+        margin-right: 10px;
+    }
+    #rating_num {
+        color: #666;
+    }
+
+    /* 推荐卡片样式 */
+    .scrollable-recommendations {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .recommendations-container {
+        display: flex;
+        flex-wrap: nowrap;
+        padding: 10px 0;
+        overflow-x: auto;
+        scrollbar-width: none; /* 隐藏滚动条但保留功能 */
+        -ms-overflow-style: none;
+        scroll-behavior: smooth;
+    }
+
+    .recommendations-container::-webkit-scrollbar {
+        display: none; /* 隐藏WebKit浏览器的滚动条 */
+    }
+
+    .recommendation-card {
+        flex: 0 0 auto;
+        width: 280px;
+        margin-right: 15px;
+    }
+
+    .card-content {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        height: 100%;
+        background-color: #fff;
+    }
+
+    .card-header {
+        padding: 10px 15px;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .card-body {
+        padding: 10px 15px;
+    }
+
+    .card-body p {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+
+    .journey-preview {
+        color: #666;
+        margin: 10px 0;
+        font-size: 13px;
+    }
+
+    .card-footer {
+        padding: 10px 15px;
+        text-align: center;
+        border-top: 1px solid #ddd;
+    }
+
+    .scroll-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .no-recommendations {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+</style>
+{% endblock content %}

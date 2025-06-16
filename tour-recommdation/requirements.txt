@@ -1,0 +1,5 @@
+django==4.2.3
+requests==2.31.0
+pillow==10.2.0
+mysqlclient==2.2.1
+pandas==2.2.0

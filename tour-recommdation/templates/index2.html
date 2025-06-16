@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="content-section">
+        <h2>热门推荐</h2>
+        <div class="hot-list">
+            {% for item in hot|slice:":10" %}
+                <div class="hot-item">
+                    <h3>{{ item.tview_name }}</h3>
+                    <p>出发地: {{ item.tview_from }}</p>
+                    <p>目的地: {{ item.tview_to }}</p>
+                    <p>行程天数: {{ item.tview_day }}天</p>
+                    <p>评分: {{ item.tview_rate }}</p>
+                    <div class="journey-preview">
+                        {{ item.tview_journey|truncatechars:100 }}
+                    </div>
+                    <a href="/tdetail?id={{ item.tid }}" class="detail-link">查看详情</a>
+                </div>
+            {% endfor %}
+        </div>
+        {% if hot|length > 10 %}
+        <div class="pagination">
+            <a href="?page={{ page|add:'-1' }}" class="{% if page == 1 %}disabled{% endif %}">上一页</a>
+            <span class="current-page">{{ page }}</span>
+            <a href="?page={{ page|add:'1' }}" class="{% if not has_next %}disabled{% endif %}">下一页</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="content-section">
+        <h2>猜你喜欢</h2>
+        <div class="guess-list">
+            {% for item in guess|slice:":10" %}
+                <div class="guess-item">
+                    <h3>{{ item.tview_name }}</h3>
+                    <p>出发地: {{ item.tview_from }}</p>
+                    <p>目的地: {{ item.tview_to }}</p>
+                    <p>行程天数: {{ item.tview_day }}天</p>
+                    <p>评分: {{ item.tview_rate }}</p>
+                    <div class="journey-preview">
+                        {{ item.tview_journey|truncatechars:100 }}
+                    </div>
+                    <a href="/tdetail?id={{ item.tid }}" class="detail-link">查看详情</a>
+                </div>
+            {% endfor %}
+        </div>
+        {% if guess|length > 10 %}
+        <div class="pagination">
+            <a href="?page={{ page|add:'-1' }}" class="{% if page == 1 %}disabled{% endif %}">上一页</a>
+            <span class="current-page">{{ page }}</span>
+            <a href="?page={{ page|add:'1' }}" class="{% if not has_next %}disabled{% endif %}">下一页</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .search-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .search-input {
+            padding: 10px;
+            width: 60%;
+            max-width: 500px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .content-section {
+            margin: 30px 0;
+            padding: 0 20px;
+        }
+        .hot-list, .guess-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .hot-item, .guess-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            width: calc(33% - 20px);
+            box-sizing: border-box;
+        }
+        .guess-item {
+            width: calc(20% - 20px);
+        }
+        .journey-preview {
+            margin: 10px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .detail-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            margin: 0 10px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-decoration: none;
+        }
+        .pagination a.disabled {
+            color: #ccc;
+            pointer-events: none;
+        }
+        .current-page {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .hot-item, .guess-item {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
